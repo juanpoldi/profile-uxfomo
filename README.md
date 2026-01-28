@@ -46,4 +46,4 @@ Este proyecto es la implementación del perfil de usuario para la comunidad **UX
    ```
 
 ---
-Creado por Juanpol para la Comunidad UX.
+Creado por Juanpol para la Comunidad UX fomo.
