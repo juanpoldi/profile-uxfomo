@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-bg: #f9fafb;
+    --color-surface: #ffffff;
+    --color-border: #f3f4f6;
+    --color-text-main: #111827;
+    --color-text-muted: #6b7280;
+    --color-text-subtle: #9ca3af;
+    --color-accent: #3b82f6;
+}
+
+body {
+    @apply bg-[#f9fafb] text-[#111827] font-sans antialiased;
+    letter-spacing: -0.01em;
+}
+
+/* Scrollbar customization */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.u-title {
+    @apply text-2xl font-bold leading-tight text-gray-900;
+}
+
+.u-label {
+    @apply text-xs font-bold uppercase tracking-widest text-gray-400;
+}
