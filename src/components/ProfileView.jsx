@@ -1,16 +1,16 @@
 import { useState } from 'react'
 
-const ProfileView = ({ data, onEdit }) => {
+const ProfileView = ({ data, onEdit, isOwner }) => {
     const [activeTab, setActiveTab] = useState('hilos')
 
     const tabs = [
         { id: 'hilos', label: 'Hilos' },
         { id: 'respuestas', label: 'Respuestas' },
-        { id: 'seguidores', label: 'Seguidores' },
-        { id: 'siguiendo', label: 'Siguiendo' },
-        { id: 'likes', label: 'Likes' },
-        { id: 'uxhub', label: 'UX Hub' },
-    ]
+        { id: 'seguidores', label: 'Seguidores', ownerOnly: true },
+        { id: 'siguiendo', label: 'Siguiendo', ownerOnly: true },
+        { id: 'likes', label: 'Likes', ownerOnly: true },
+        { id: 'recursos', label: 'Recursos' },
+    ].filter(tab => !tab.ownerOnly || isOwner)
 
     return (
         <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
@@ -27,20 +27,17 @@ const ProfileView = ({ data, onEdit }) => {
                             <p className="text-gray-500 font-medium">@{data.nick}</p>
                         </div>
                         <div className="flex gap-3">
-                            <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                                Seguir
-                            </button>
-                            <button onClick={onEdit} className="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                                Editar perfil
-                            </button>
+                            {!isOwner && (
+                                <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                                    Seguir
+                                </button>
+                            )}
+                            {isOwner && (
+                                <button onClick={onEdit} className="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                                    Editar perfil
+                                </button>
+                            )}
                         </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex gap-6 text-sm">
-                        <div className="flex gap-1.5"><span className="font-bold text-gray-900">{data.stats.followers}</span><span className="text-gray-500">seguidores</span></div>
-                        <div className="flex gap-1.5"><span className="font-bold text-gray-900">{data.stats.following}</span><span className="text-gray-500">siguiendo</span></div>
-                        <div className="flex gap-1.5"><span className="font-bold text-gray-900">{data.stats.likes}</span><span className="text-gray-500">likes</span></div>
                     </div>
 
                     {/* Bio */}
@@ -51,24 +48,18 @@ const ProfileView = ({ data, onEdit }) => {
 
                     {/* Social Links */}
                     <div className="flex flex-wrap gap-4 pt-2">
-                        {data.links.website && (
-                            <a href={data.links.website} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors text-sm flex items-center gap-1.5">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-                                Website
-                            </a>
-                        )}
-                        {data.links.linkedin && (
-                            <a href={data.links.linkedin} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-700 transition-colors text-sm flex items-center gap-1.5">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
-                                LinkedIn
-                            </a>
-                        )}
-                        {data.links.instagram && (
-                            <a href={data.links.instagram} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-pink-600 transition-colors text-sm flex items-center gap-1.5">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.351-.2 6.78-2.618 6.98-6.98.058-1.28.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.352-2.619-6.78-6.98-6.98C15.667.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
-                                Instagram
-                            </a>
-                        )}
+                        {data.linksOrder?.map(key => {
+                            const url = data.links[key]
+                            if (!url) return null
+
+                            const label = data.linkNames?.[key] || (key.charAt(0).toUpperCase() + key.slice(1))
+
+                            return (
+                                <a key={key} href={url} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-900 transition-colors text-sm flex items-center font-medium">
+                                    {label}
+                                </a>
+                            )
+                        })}
                     </div>
                 </div>
             </header>

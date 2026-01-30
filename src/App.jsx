@@ -21,6 +21,14 @@ const DEFAULT_PROFILE_DATA = {
         behance: '',
         instagram: 'https://instagram.com/juanperez'
     },
+    linkNames: {
+        website: 'Website',
+        linkedin: 'LinkedIn',
+        instagram: 'Instagram',
+        github: 'GitHub',
+        behance: 'Behance'
+    },
+    linksOrder: ['website', 'linkedin', 'instagram', 'github', 'behance'],
     featuredContent: [
         { id: 1, url: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=400', caption: 'Rediseño Mobile App' },
         { id: 2, url: 'https://images.unsplash.com/photo-1561070791-26c145824a4d?auto=format&fit=crop&q=80&w=400', caption: 'Sistema de Diseño' },
@@ -38,20 +46,19 @@ function App() {
             const savedData = localStorage.getItem(STORAGE_KEY)
             if (savedData) {
                 const parsed = JSON.parse(savedData)
+                // Mezcla profunda para asegurar que no falten claves nuevas
                 return {
                     ...DEFAULT_PROFILE_DATA,
                     ...parsed,
-                    // Aseguramos que los objetos anidados también conserven sus claves por defecto
                     links: { ...DEFAULT_PROFILE_DATA.links, ...parsed.links },
-                    stats: { ...DEFAULT_PROFILE_DATA.stats, ...parsed.stats },
-                    featuredContent: parsed.featuredContent || DEFAULT_PROFILE_DATA.featuredContent
+                    linkNames: { ...DEFAULT_PROFILE_DATA.linkNames, ...parsed.linkNames },
+                    stats: { ...DEFAULT_PROFILE_DATA.stats, ...parsed.stats }
                 }
             }
-            return DEFAULT_PROFILE_DATA
         } catch (error) {
             console.error("Error cargando datos de localStorage", error)
-            return DEFAULT_PROFILE_DATA
         }
+        return DEFAULT_PROFILE_DATA
     })
 
     // Guardar en localStorage cada vez que profileData cambie
@@ -63,8 +70,27 @@ function App() {
         }
     }, [profileData])
 
+    const [viewMode, setViewMode] = useState('owner') // 'public' | 'owner'
+
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-white">
+            {!isEditing && (
+                <div className="fixed top-4 left-4 z-50 flex gap-2">
+                    <button
+                        onClick={() => setViewMode('owner')}
+                        className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border transition-all ${viewMode === 'owner' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                        Propietario
+                    </button>
+                    <button
+                        onClick={() => setViewMode('public')}
+                        className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border transition-all ${viewMode === 'public' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-200'}`}
+                    >
+                        Público
+                    </button>
+                </div>
+            )}
+
             {isEditing ? (
                 <ProfileEdit
                     data={profileData}
@@ -78,6 +104,7 @@ function App() {
                 <ProfileView
                     data={profileData}
                     onEdit={() => setIsEditing(true)}
+                    isOwner={viewMode === 'owner'}
                 />
             )}
         </div>
