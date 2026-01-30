@@ -32,15 +32,9 @@ Aplicación de perfil de usuario personalizada para la comunidad **UX fomo**, co
 - **Mezcla de Datos:** Sistema robusto en `App.jsx` que previene la pérdida de datos al añadir nuevas funcionalidades.
 - **Modo Prueba:** Botones temporales en la esquina superior izquierda para alternar entre vista de "Propietario" y "Público".
 
----
-
----
-
 ## 🌟 Proyectos Derivados (Spinoffs)
 
 - **Mini Portfolio:** Está planificado crear una versión simplificada de este proyecto enfocada al 100% en un "Mini Portfolio" personal. La idea es reutilizar toda la lógica de gestión de imágenes Base64, el sistema de Drag & Drop y la persistencia local para ofrecer una herramienta de portafolio ultra-rápida y ligera.
-
----
 
 ## 📋 Tareas Pendientes (Backlog)
 
@@ -50,8 +44,6 @@ Aplicación de perfil de usuario personalizada para la comunidad **UX fomo**, co
 - [ ] **Temas Visuales:** Soporte para modo oscuro (Dark Mode).
 - [ ] **Validación de URLs:** Añadir comprobación de formato `https://` en los campos de enlaces.
 - [ ] **Pestañas Reales:** Implementar la lógica para que las pestañas de "Hilos" y "Respuestas" carguen contenido dinámico.
-
----
 
 ## ⚙️ Instalación y Uso
 
