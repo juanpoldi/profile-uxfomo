@@ -2,24 +2,24 @@ import { useState, useEffect } from 'react'
 import ProfileView from './components/ProfileView'
 import ProfileEdit from './components/ProfileEdit'
 
-// Datos iniciales por defecto (Mock)
+// Estado inicial del perfil (vacío; los datos se guardan en localStorage)
 const DEFAULT_PROFILE_DATA = {
-    name: 'Juan Pérez',
-    nick: 'juanuxdesign',
-    bio: 'Explorando la intersección entre el diseño visual y la psicología del comportamiento. Amante del café y las interfaces limpias.',
-    presentation: 'Actualmente diseñando el futuro de las comunidades digitales en UX fomo. Especializado en sistemas de diseño y tipografía aplicada.',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+    name: '',
+    nick: '',
+    bio: '',
+    presentation: '',
+    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=UX&backgroundColor=e5e7eb',
     stats: {
-        followers: '1.2k',
-        following: '450',
-        likes: '8.4k'
+        followers: '0',
+        following: '0',
+        likes: '0'
     },
     links: {
-        website: 'https://juanperez.design',
-        linkedin: 'https://linkedin.com/in/juanperez',
+        website: '',
+        linkedin: '',
         github: '',
         behance: '',
-        instagram: 'https://instagram.com/juanperez'
+        instagram: ''
     },
     linkNames: {
         website: 'Website',
@@ -29,10 +29,7 @@ const DEFAULT_PROFILE_DATA = {
         behance: 'Behance'
     },
     linksOrder: ['website', 'linkedin', 'instagram', 'github', 'behance'],
-    featuredContent: [
-        { id: 1, url: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=400', caption: 'Rediseño Mobile App' },
-        { id: 2, url: 'https://images.unsplash.com/photo-1561070791-26c145824a4d?auto=format&fit=crop&q=80&w=400', caption: 'Sistema de Diseño' },
-    ]
+    featuredContent: []
 }
 
 const STORAGE_KEY = 'uxfomo_profile_data'
@@ -47,12 +44,14 @@ function App() {
             if (savedData) {
                 const parsed = JSON.parse(savedData)
                 // Mezcla profunda para asegurar que no falten claves nuevas
+                const featuredContent = Array.isArray(parsed.featuredContent) ? parsed.featuredContent : DEFAULT_PROFILE_DATA.featuredContent
                 return {
                     ...DEFAULT_PROFILE_DATA,
                     ...parsed,
                     links: { ...DEFAULT_PROFILE_DATA.links, ...parsed.links },
                     linkNames: { ...DEFAULT_PROFILE_DATA.linkNames, ...parsed.linkNames },
-                    stats: { ...DEFAULT_PROFILE_DATA.stats, ...parsed.stats }
+                    stats: { ...DEFAULT_PROFILE_DATA.stats, ...parsed.stats },
+                    featuredContent
                 }
             }
         } catch (error) {
@@ -72,10 +71,19 @@ function App() {
 
     const [viewMode, setViewMode] = useState('owner') // 'public' | 'owner'
 
+    const clearStorageAndReset = () => {
+        try {
+            localStorage.removeItem(STORAGE_KEY)
+            setProfileData(DEFAULT_PROFILE_DATA)
+        } catch (error) {
+            console.error('Error limpiando localStorage', error)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-white">
             {!isEditing && (
-                <div className="fixed top-4 left-4 z-50 flex gap-2">
+                <div className="fixed top-4 left-4 z-50 flex items-center gap-2 flex-wrap">
                     <button
                         onClick={() => setViewMode('owner')}
                         className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border transition-all ${viewMode === 'owner' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-200'}`}
@@ -87,6 +95,14 @@ function App() {
                         className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border transition-all ${viewMode === 'public' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-200'}`}
                     >
                         Público
+                    </button>
+                    <button
+                        type="button"
+                        onClick={clearStorageAndReset}
+                        className="px-3 py-1 text-[10px] font-medium text-gray-400 hover:text-red-600 rounded-full border border-gray-200 hover:border-red-200 transition-all"
+                        title="Borrar datos guardados y volver al perfil vacío"
+                    >
+                        Limpiar datos
                     </button>
                 </div>
             )}

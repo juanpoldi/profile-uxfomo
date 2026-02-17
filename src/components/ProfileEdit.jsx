@@ -2,12 +2,15 @@ import { useState } from 'react'
 
 const ProfileEdit = ({ data, onSave, onCancel }) => {
     const [formData, setFormData] = useState(formDataWithDefaults(data))
+    // Mapa de errores de archivo por item.id (featured) o 'avatar'
+    const [fileErrors, setFileErrors] = useState({})
 
     function formDataWithDefaults(d) {
         return {
             ...d,
             linksOrder: d.linksOrder || ['website', 'linkedin', 'instagram', 'github', 'behance'],
-            linkNames: d.linkNames || { website: 'Website', linkedin: 'LinkedIn', instagram: 'Instagram', github: 'GitHub', behance: 'Behance' }
+            linkNames: d.linkNames || { website: 'Website', linkedin: 'LinkedIn', instagram: 'Instagram', github: 'GitHub', behance: 'Behance' },
+            featuredContent: Array.isArray(d.featuredContent) ? d.featuredContent : []
         }
     }
 
@@ -33,23 +36,41 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
 
     const MAX_FILE_SIZE = 1024 * 1024 // 1MB
 
-    const validateAndProcessFile = (file, callback) => {
+    /**
+     * Valida el tamaño del archivo y lo convierte a base64.
+     * @param {File} file
+     * @param {string} errorKey - clave para fileErrors ('avatar' o item.id)
+     * @param {(result: string) => void} onSuccess
+     */
+    const validateAndProcessFile = (file, errorKey, onSuccess) => {
+        // Limpiar error previo de esta clave
+        setFileErrors(prev => { const n = { ...prev }; delete n[errorKey]; return n })
+
         if (file.size > MAX_FILE_SIZE) {
-            alert("La imagen es demasiado grande. El límite es de 1MB para asegurar el guardado correcto.")
+            setFileErrors(prev => ({
+                ...prev,
+                [errorKey]: `La imagen supera el límite de 1 MB. Tamaño actual: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`
+            }))
+            // Reset input para que el mismo archivo vuelva a disparar onChange si el usuario lo reintenta
             return
         }
         const reader = new FileReader()
-        reader.onloadend = () => callback(reader.result)
+        reader.onloadend = () => onSuccess(reader.result)
+        reader.onerror = () => {
+            setFileErrors(prev => ({ ...prev, [errorKey]: 'Error al leer el archivo. Inténtalo de nuevo.' }))
+        }
         reader.readAsDataURL(file)
     }
 
     const handleAvatarChange = (e) => {
         const file = e.target.files[0]
         if (file) {
-            validateAndProcessFile(file, (result) => {
+            validateAndProcessFile(file, 'avatar', (result) => {
                 setFormData(prev => ({ ...prev, avatar: result }))
             })
         }
+        // Reset para permitir seleccionar el mismo archivo otra vez
+        e.target.value = ''
     }
 
     const handleAvatarUrlChange = (e) => {
@@ -59,7 +80,7 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
     const handleFeaturedImageChange = (id, e) => {
         const file = e.target.files[0]
         if (file) {
-            validateAndProcessFile(file, (result) => {
+            validateAndProcessFile(file, id, (result) => {
                 setFormData(prev => ({
                     ...prev,
                     featuredContent: prev.featuredContent.map(item =>
@@ -68,6 +89,8 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
                 }))
             })
         }
+        // Reset para permitir seleccionar el mismo archivo otra vez
+        e.target.value = ''
     }
 
     const handleFeaturedUrlChange = (id, value) => {
@@ -162,8 +185,11 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         </label>
                     </div>
-                    <div className="text-center">
-                        <p className="text-[10px] text-gray-400 font-medium">JPG, PNG o SVG. Máximo 1MB.</p>
+                    <div className="text-center space-y-1">
+                        <p className="text-[10px] text-gray-400 font-medium">JPG, PNG o SVG. Máximo 1 MB.</p>
+                        {fileErrors['avatar'] && (
+                            <p className="text-[10px] text-red-500 font-medium">{fileErrors['avatar']}</p>
+                        )}
                     </div>
                     {!formData.avatar.startsWith('data:') && !formData.avatar.startsWith('blob:') && (
                         <div className="w-full max-w-xs space-y-1.5 text-center">
@@ -298,19 +324,45 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
 
                                 <div className="flex-1 space-y-4">
                                     <div className="flex flex-col md:flex-row gap-4">
-                                        <div className="w-full md:w-32 aspect-video bg-gray-50 rounded-lg overflow-hidden relative flex-shrink-0">
-                                            <img src={item.url} alt={item.caption} className="w-full h-full object-cover" />
-                                            <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFeaturedImageChange(item.id, e)} />
-                                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                        {/* Miniatura con zona de subida */}
+                                        <div className="w-full md:w-32 aspect-video bg-gray-50 rounded-lg overflow-hidden relative flex-shrink-0 border border-gray-200">
+                                            {/* Imagen: solo renderizar si hay URL para evitar img src="" */}
+                                            {item.url && (
+                                                <img src={item.url} alt={item.caption} className="w-full h-full object-cover" />
+                                            )}
+                                            {/* Zona de subida: siempre visible si no hay imagen; hover si ya hay imagen */}
+                                            <label className={`absolute inset-0 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                                                item.url
+                                                    ? 'bg-black/20 opacity-0 hover:opacity-100'
+                                                    : 'bg-gray-50 opacity-100 hover:bg-gray-100'
+                                            }`}>
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleFeaturedImageChange(item.id, e)}
+                                                />
+                                                {item.url ? (
+                                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    </svg>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span className="text-[9px] text-gray-400 font-medium text-center leading-tight px-1">Subir imagen<br />Máx. 1 MB</span>
+                                                    </>
+                                                )}
                                             </label>
                                         </div>
+
                                         <div className="flex-1 space-y-3">
                                             <div className="flex gap-2">
                                                 {!item.url.startsWith('data:') && !item.url.startsWith('blob:') && (
                                                     <input
                                                         type="text"
-                                                        placeholder="URL de la imagen"
+                                                        placeholder="O pega una URL de imagen"
                                                         value={item.url}
                                                         onChange={(e) => handleFeaturedUrlChange(item.id, e.target.value)}
                                                         className="flex-1 px-3 py-1.5 bg-gray-50 border-none rounded-md focus:ring-2 focus:ring-blue-500/20 text-xs text-gray-600"
@@ -332,6 +384,15 @@ const ProfileEdit = ({ data, onSave, onCancel }) => {
                                                 onChange={(e) => handleFeaturedCaptionChange(item.id, e.target.value)}
                                                 className="w-full px-3 py-1.5 bg-gray-50 border-none rounded-md focus:ring-2 focus:ring-blue-500/20 text-xs text-gray-600 font-medium"
                                             />
+                                            {/* Error de archivo para este ítem */}
+                                            {fileErrors[item.id] && (
+                                                <p className="text-[10px] text-red-500 font-medium flex items-center gap-1">
+                                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    {fileErrors[item.id]}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
