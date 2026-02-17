@@ -27,6 +27,15 @@ Aplicación de perfil de usuario personalizada para la comunidad **UX fomo**, co
 - **Validación de Tamaño:** Límite estricto de **1MB** por imagen para asegurar el rendimiento y el guardado.
 - **UI Inteligente:** Ocultación automática del campo URL al subir archivos locales.
 
+### 📤 Exportación de Datos del Perfil
+- **Modal de Descarga:** Interfaz dedicada (`ExportDataModal`) para configurar qué datos incluir antes de descargar.
+- **Formato ZIP:** Descarga una carpeta comprimida con `data.json` + imágenes como archivos reales (avatar y destacados), usando **JSZip**.
+- **Formato JSON:** Descarga un único `.json` con todos los datos (imágenes en Base64 incluidas).
+- **Detección inteligente:** Si el perfil no tiene imágenes locales, el formato por defecto pasa a JSON automáticamente.
+- **Selección granular:** El usuario puede elegir si incluir los datos del perfil, el avatar y/o las imágenes destacadas de forma independiente.
+- **Accesibilidad y UX:** El modal se cierra con `Escape`, tiene overlay con blur, foco gestionado y aviso de próxima funcionalidad GDPR.
+- **Utilidades reutilizables:** Toda la lógica de exportación está encapsulada en `src/utils/exportProfile.js` con funciones `buildExportPayload`, `downloadProfileJson` y `downloadProfileZip`.
+
 ### 💾 Almacenamiento y UX
 - **LocalStorage:** Persistencia automática de todos los datos del perfil.
 - **Mezcla de Datos:** Sistema robusto en `App.jsx` que previene la pérdida de datos al añadir nuevas funcionalidades.
@@ -40,10 +49,20 @@ Aplicación de perfil de usuario personalizada para la comunidad **UX fomo**, co
 
 ### 🚀 Futuras Mejoras
 - [ ] **Optimización de Imágenes:** Implementar compresión automática en el cliente antes de convertir a Base64.
-- [ ] **Exportación de Datos:** Botón para descargar el perfil en formato JSON.
+- [x] **Exportación de Datos:** Modal completo para descargar el perfil en formato JSON o ZIP con imágenes. ✅
+- [ ] **Exportación GDPR:** Incluir datos de privacidad, actividad, permisos, inicios de sesión, dispositivo y newsletter.
 - [ ] **Temas Visuales:** Soporte para modo oscuro (Dark Mode).
 - [ ] **Validación de URLs:** Añadir comprobación de formato `https://` en los campos de enlaces.
 - [ ] **Pestañas Reales:** Implementar la lógica para que las pestañas de "Hilos" y "Respuestas" carguen contenido dinámico.
+
+## 📦 Stack y Dependencias Clave
+
+| Paquete | Uso |
+|---|---|
+| React + Vite | Framework y bundler |
+| Tailwind CSS | Estilos utilitarios |
+| JSZip | Generación de archivos `.zip` en el cliente para la exportación de datos |
+| @dnd-kit | Drag & Drop para reordenar enlaces y contenido destacado |
 
 ## ⚙️ Instalación y Uso
 
